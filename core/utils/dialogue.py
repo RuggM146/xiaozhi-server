@@ -30,6 +30,12 @@ class Dialogue:
 
     def put(self, message: Message):
         self.dialogue.append(message)
+        if message.content and message.role in ("user", "assistant"):
+            try:
+                from core.chat_history import record_chat_message
+                record_chat_message(message.role, message.content)
+            except Exception:
+                pass
 
     def getMessages(self, m, dialogue):
         if m.tool_calls is not None:

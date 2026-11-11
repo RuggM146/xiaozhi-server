@@ -3,7 +3,11 @@ import sys
 import uuid
 import signal
 import asyncio
-from aioconsole import ainput
+try:
+    from aioconsole import ainput
+except ImportError:
+    async def ainput():
+        await asyncio.sleep(3600)
 from config.settings import load_config
 from config.logger import setup_logging
 from core.utils.util import get_local_ip, validate_mcp_endpoint
@@ -88,12 +92,17 @@ async def main():
     gc_manager = get_gc_manager(interval_seconds=300)
     await gc_manager.start()
 
-    # 启动 WebSocket 服务器
-    ws_server = WebSocketServer(config)
-    ws_task = asyncio.create_task(ws_server.start())
-    # 启动 Simple http 服务器
-    ota_server = SimpleHttpServer(config)
-    ota_task = asyncio.create_task(ota_server.start())
+    # 启动 Unified Web Manager & WebSocket Server
+    from core.unified_server import UnifiedServer
+    from aiohttp import web
+    unified_server = UnifiedServer(config)
+    web_app = unified_server.create_app()
+    server_port = int(config["server"].get("port", 8000))
+    runner = web.AppRunner(web_app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", server_port)
+    await site.start()
+    logger.bind(tag=TAG).info("Unified Web Console & WebSocket running on port {}", server_port)
 
     read_config_from_api = config.get("read_config_from_api", False)
     port = int(config["server"].get("http_port", 8003))

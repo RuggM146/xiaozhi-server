@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XiaoZhi Control Center | Console di Gestione</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0a0d14;
+            --bg-surface: #111622;
+            --bg-card: rgba(23, 31, 46, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-active: rgba(99, 102, 241, 0.5);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.35);
+            --primary-hover: #4f46e5;
+            --accent: #06b6d4;
+            --accent-glow: rgba(6, 182, 212, 0.3);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent 70%),
+                radial-gradient(ellipse 60% 40% at 85% 90%, rgba(6, 182, 212, 0.1), transparent 60%);
+            background-attachment: fixed;
+        }
+
+        /* Header */
+        header {
+            background: rgba(17, 22, 34, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 0.85rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px var(--primary-glow);
+            font-size: 1.25rem;
+        }
+
+        .brand-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            text-transform: uppercase;
+        }
+
+        .device-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 0.45rem 1rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.9); }
+        }
+
+        /* Container & Navigation */
+        .app-container {
+            flex: 1;
+            max-width: 1300px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.75rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-surface);
+            padding: 0.35rem;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.65rem 1.25rem;
+            border-radius: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .nav-tab.active {
+            color: var(--text-main);
+            background: var(--primary);
+            box-shadow: 0 4px 15px var(--primary-glow);
+            font-weight: 600;
+        }
+
+        /* Content Sections */
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 1.75rem;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Forms & Inputs */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        input[type="text"], input[type="password"], select, textarea {
+            background: rgba(10, 13, 20, 0.85);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        textarea {
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            line-height: 1.5;
+            resize: vertical;
+            min-height: 220px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .range-val {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            background: var(--bg-surface);
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            min-width: 48px;
+            text-align: center;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.4rem;
+            border-radius: 10px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* Preset Chips */
+        .preset-chips {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+        }
+
+        .chip {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chip:hover {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--text-main);
+            border-color: var(--primary);
+        }
+
+        /* Hardware Key Mappings */
+        .hardware-key-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .key-card {
+            background: rgba(10, 13, 20, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .key-badge {
+            align-self: flex-start;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent);
+            border: 1px solid var(--accent-glow);
+        }
+
+        .key-name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .key-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Chat feed */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 520px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            overflow: hidden;
+            background: rgba(10, 13, 20, 0.7);
+        }
+
+        .chat-feed {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-msg {
+            display: flex;
+            flex-direction: column;
+            max-width: 82%;
+            gap: 0.25rem;
+        }
+
+        .chat-msg.user {
+            align-self: flex-end;
+        }
+
+        .chat-msg.assistant {
+            align-self: flex-start;
+        }
+
+        .msg-bubble {
+            padding: 0.85rem 1.15rem;
+            border-radius: 14px;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .chat-msg.user .msg-bubble {
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-msg.assistant .msg-bubble {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-bottom-left-radius: 2px;
+        }
+
+        .msg-meta {
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            padding: 0 0.35rem;
+        }
+
+        .chat-input-bar {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.85rem;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--success);
+            color: var(--text-main);
+            padding: 0.85rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 100;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="brand">
+            <div class="brand-logo">🤖</div>
+            <div>
+                <span class="brand-title">XiaoZhi Control Center</span>
+                <span class="brand-badge">SiliconFlow &bull; Qwen 2.5</span>
+            </div>
+        </div>
+
+        <div class="device-pill" id="deviceStatusPill">
+            <div class="status-dot"></div>
+            <span>Dispositivo: <strong>Waveshare ESP32-S3</strong></span>
+            <span style="color: var(--text-dim);">|</span>
+            <span id="macDisplay" style="font-family: var(--font-mono); font-size: 0.8rem;">90:70:69:eb:12:60</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="app-container">
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('tab-persona')">🎭 Personaggio &amp; Prompt</button>
+            <button class="nav-tab" onclick="switchTab('tab-ai')">⚡ Modelli AI &amp; Voce</button>
+            <button class="nav-tab" onclick="switchTab('tab-mcp')">🔌 Strumenti MCP</button>
+            <button class="nav-tab" onclick="switchTab('tab-hardware')">📟 Mappa Tasti &amp; Wake Word</button>
+            <button class="nav-tab" onclick="switchTab('tab-chat')">💬 Chat &amp; Log dal Vivo</button>
+        </nav>
+
+        <!-- TAB 1: PERSONAGGIO & PROMPT -->
+        <div id="tab-persona" class="tab-panel active">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">🎭 Identità dell'Assistente</div>
+                            <div class="card-subtitle">Personalizza il nome, il comportamento e le risposte del tuo assistente vocale.</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nome Personaggio</label>
+                        <input type="text" id="charName" value="Socrate" placeholder="Es. Socrate, Jarvis, XiaoZhi">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Lingua di Risposta Principale</label>
+                        <select id="charLanguage">
+                            <option value="Italian" selected>Italiano (TTS Ottimizzato)</option>
+                            <option value="English">English</option>
+                            <option value="Chinese">Chinese (中文)</option>
+                            <option value="Spanish">Español</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Preset Rapidi</label>
+                        <div class="preset-chips">
+                            <span class="chip" onclick="applyPreset('socrate')">🏛️ Socrate Filosofo</span>
+                            <span class="chip" onclick="applyPreset('jarvis')">🚀 Jarvis Tecnico</span>
+                            <span class="chip" onclick="applyPreset('friendly')">✨ Amichevole ed Empatico</span>
+                            <span class="chip" onclick="applyPreset('concise')">🎯 Diretto e Iper-Conciso</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>System Prompt Completo (Regole di comportamento)</label>
+                        <textarea id="systemPromptText" spellcheck="false" placeholder="Caricamento prompt in corso..."></textarea>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="savePrompt()">💾 Salva Modifiche Personaggio</button>
+                        <button class="btn btn-secondary" onclick="loadPrompt()">🔄 Ripristina</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">📋 Regole Vocali Attive</div>
+                            <div class="card-subtitle">Vincoli per mantenere risposte fluide e naturali sullo speaker.</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.9rem; line-height: 1.6; color: var(--text-muted);">
+                        <div style="background: rgba(99, 102, 241, 0.08); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                            <strong style="color: var(--text-main);">1. Diretto al Punto:</strong> La prima frase risponde subito alla richiesta senza convenevoli lunghi o preamble burocratici.
+                        </div>
+                        <div style="background: rgba(6, 182, 212, 0.08); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                            <strong style="color: var(--text-main);">2. Tolleranza Errori ASR:</strong> Se il microfono trascrive parole quasi omofone, l'IA deduce l'intento reale senza mai correggere la pronuncia.
+                        </div>
+                        <div style="background: rgba(16, 185, 129, 0.08); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color);">
+                            <strong style="color: var(--text-main);">3. No Markdown sullo Speaker:</strong> Nessun grassetto `**`, nessun elenco puntato `*` o blocchi di codice ````, per evitare che il sintetizzatore legga simboli strani.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: MODELLI AI & VOCE -->
+        <div id="tab-ai" class="tab-panel">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">🧠 Intelligenza Artificiale (SiliconFlow)</div>
+                            <div class="card-subtitle">Modello di linguaggio naturale con latenza minima e alta precisione.</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Modello LLM</label>
+                        <select id="llmModelSelect">
+                            <option value="Qwen/Qwen2.5-7B-Instruct" selected>Qwen 2.5 7B Instruct (Velocissimo ~200ms - Consigliato)</option>
+                            <option value="Qwen/Qwen2.5-14B-Instruct">Qwen 2.5 14B Instruct (Maggiore ragionamento)</option>
+                            <option value="Qwen/Qwen2.5-32B-Instruct">Qwen 2.5 32B Instruct (Alta complessità)</option>
+                            <option value="deepseek-ai/DeepSeek-V3">DeepSeek V3 (Ragionamento profondo)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span>Temperatura (Creatività vs Precisione)</span>
+                            <span class="range-val" id="tempDisplay">0.7</span>
+                        </label>
+                        <div class="range-container">
+                            <input type="range" id="tempSlider" min="0" max="1" step="0.05" value="0.7" oninput="document.getElementById('tempDisplay').textContent = this.value">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Max Token Risposta</label>
+                        <input type="text" id="maxTokensInput" value="500">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Chiave API SiliconFlow</label>
+                        <input type="password" id="sfApiKeyInput" placeholder="sk-...">
+                    </div>
+
+                    <button class="btn btn-primary" onclick="saveAIConfig()">💾 Salva Configurazione AI</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">🎙️ Voce &amp; Riconoscimento Vocale</div>
+                            <div class="card-subtitle">FunAudioLLM CosyVoice 2 per la sintesi e SenseVoice per la trascrizione.</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Voce CosyVoice (Timbro Vocale)</label>
+                        <select id="ttsVoiceSelect">
+                            <option value="FunAudioLLM/CosyVoice2-0.5B:alex" selected>Alex (Maschile naturale, dinamico)</option>
+                            <option value="FunAudioLLM/CosyVoice2-0.5B:anna">Anna (Femminile chiaro, amichevole)</option>
+                            <option value="FunAudioLLM/CosyVoice2-0.5B:bella">Bella (Femminile caldo ed espressivo)</option>
+                            <option value="FunAudioLLM/CosyVoice2-0.5B:benjamin">Benjamin (Maschile profondo e saggio)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Modello Riconoscimento Vocale (ASR)</label>
+                        <input type="text" value="FunAudioLLM/SenseVoiceSmall (Cloud SiliconFlow)" disabled style="opacity: 0.7;">
+                    </div>
+
+                    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1rem; border-radius: 12px; margin-top: 1rem;">
+                        <div style="color: var(--success); font-weight: 700; font-size: 0.9rem; margin-bottom: 0.25rem;">⚡ Zero Latenza Cloud</div>
+                        <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.4;">
+                            SenseVoice Small trascrive l'audio Opus a 16 kHz in meno di 100 ms senza appesantire la RAM del server.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: STRUMENTI MCP -->
+        <div id="tab-mcp" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">🔌 Model Context Protocol (MCP)</div>
+                        <div class="card-subtitle">Collega server di strumenti esterni per dare all'IA capacità di ricerca, domotica e comandi.</div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadMCPConfig()">🔄 Ricarica MCP</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Configurazione Server MCP (.mcp_server_settings.json)</label>
+                    <textarea id="mcpConfigText" style="min-height: 260px;" spellcheck="false"></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="saveMCPConfig()">💾 Salva e Attiva Server MCP</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: MAPPA TASTI & HARDWARE -->
+        <div id="tab-hardware" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">📟 Mappa Pulsanti &amp; Funzioni Hardware</div>
+                        <div class="card-subtitle">Configurazione dei tasti fisici sulla scheda Waveshare ESP32-S3 Audio Board.</div>
+                    </div>
+                </div>
+
+                <div class="hardware-key-grid">
+                    <div class="key-card">
+                        <span class="key-badge">Tasto K2 (EXIO 10)</span>
+                        <div class="key-name">🎙️ Push-to-Talk</div>
+                        <div class="key-desc">Premi e tieni premuto (o fai click) per iniziare subito a parlare con l'assistente senza attendere la wake word.</div>
+                    </div>
+
+                    <div class="key-card">
+                        <span class="key-badge">Tasto K1 (EXIO 9)</span>
+                        <div class="key-name">🔊 Volume + (Positivo)</div>
+                        <div class="key-desc">Aumenta il volume dello speaker NS4150B / DAC ES8311 con incrementi del 10%.</div>
+                    </div>
+
+                    <div class="key-card">
+                        <span class="key-badge">Tasto K3 (EXIO 11)</span>
+                        <div class="key-name">🔉 Volume - (Negativo)</div>
+                        <div class="key-desc">Diminuisce il volume dello speaker per ascoltare comodamente a basso volume.</div>
+                    </div>
+
+                    <div class="key-card">
+                        <span class="key-badge">Tasto BOOT (GPIO 0)</span>
+                        <div class="key-name">🔄 3 Secondi: Wi-Fi Setup</div>
+                        <div class="key-desc">Tieni premuto il tasto BOOT per 3 secondi per avviare l'Access Point <code>Xiaozhi-XXXX</code> (IP <code>192.168.4.1</code>) e cambiare rete Wi-Fi o server.</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid var(--border-active); padding: 1.25rem; border-radius: 14px; margin-top: 1rem;">
+                    <div style="font-weight: 700; margin-bottom: 0.35rem; color: #a5b4fc;">🗣️ Wake Word Vocale Attiva:</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">
+                        Il modello WakeNet integrato nel firmware v2.4.2 risponde alla wake word ufficiale: <strong>"你好小智"</strong> (oppure usa il comodo tasto <strong>K2 Push-to-Talk</strong>).
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: CHAT & LOG DAL VIVO -->
+        <div id="tab-chat" class="tab-panel">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">💬 Monitor Conversazioni &amp; Test Web</div>
+                        <div class="card-subtitle">Trascrizioni audio in tempo reale dalla scheda e chat di collaudo dal browser.</div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="refreshChatHistory()">🔄 Aggiorna Log</button>
+                </div>
+
+                <div class="chat-container">
+                    <div class="chat-feed" id="chatFeed">
+                        <div class="chat-msg assistant">
+                            <div class="msg-bubble">
+                                Salve! Sono pronto ad ascoltarti dalla scheda fisica o tramite questo pannello. Come posso aiutarti oggi?
+                            </div>
+                            <div class="msg-meta">Sistema &bull; Avviato</div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-bar">
+                        <input type="text" id="chatInput" placeholder="Digita un messaggio di test per parlare con Qwen 2.5..." onkeydown="if(event.key === 'Enter') sendWebChat()">
+                        <button class="btn btn-primary" onclick="sendWebChat()">Invia</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastIcon">✅</span>
+        <span id="toastMsg">Operazione completata con successo!</span>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if(tabId === 'tab-chat') {
+                refreshChatHistory();
+            }
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            document.getElementById('toastIcon').textContent = isError ? '⚠️' : '✅';
+            toast.style.borderColor = isError ? 'var(--danger)' : 'var(--success)';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        // Preset Prompts
+        const presets = {
+            socrate: `You are Socrates (Socrate), the ancient Greek philosopher, speaking through this voice device.
+Your tone is humble yet penetrating, deeply engaging, ironic, and dialectical (Maieutica).
+You speak primarily in Italian (Italiano).
+Never give pedantic lectures. Answer questions by gently asking thoughtful questions that reveal hidden assumptions, leading the speaker to discover truth for themselves.
+Keep spoken responses concise, natural, warm, and conversational.`,
+
+            jarvis: `You are Jarvis, an ultra-advanced, highly efficient personal AI assistant.
+Your tone is polished, respectful, slightly witty, concise, and hyper-competent.
+You respond in Italian (Italiano).
+Provide answers directly, factually, and without unnecessary fluff.`,
+
+            friendly: `You are a cheerful, empathetic, and wonderfully warm personal voice companion.
+You respond in Italian (Italiano).
+Your speech is lively, friendly, emotionally supportive, and natural.`,
+
+            concise: `You are a direct, zero-filler voice assistant.
+You respond in Italian (Italiano).
+Maximum 2 sentences per response. Answer the core query immediately.`
+        };
+
+        function applyPreset(presetKey) {
+            if (presets[presetKey]) {
+                document.getElementById('systemPromptText').value = presets[presetKey];
+                showToast(`Preset "${presetKey}" applicato nell'editor. Clicca su Salva per attivarlo!`);
+            }
+        }
+
+        // Load / Save Prompt
+        async function loadPrompt() {
+            try {
+                const res = await fetch('/api/prompt');
+                if (res.ok) {
+                    const text = await res.text();
+                    document.getElementById('systemPromptText').value = text;
+                }
+            } catch (e) {
+                console.error("Errore caricamento prompt:", e);
+            }
+        }
+
+        async function savePrompt() {
+            const content = document.getElementById('systemPromptText').value;
+            const lang = document.getElementById('charLanguage').value;
+            try {
+                const res = await fetch('/api/prompt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: content, language: lang })
+                });
+                if (res.ok) {
+                    showToast("Prompt del Personaggio salvato ed applicato all'IA!");
+                } else {
+                    showToast("Errore durante il salvataggio del prompt", true);
+                }
+            } catch (e) {
+                showToast("Errore di connessione: " + e.message, true);
+            }
+        }
+
+        // Load / Save AI Config
+        async function loadAIConfig() {
+            try {
+                const res = await fetch('/api/config');
+                if (res.ok) {
+                    const cfg = await res.json();
+                    if (cfg.LLM && cfg.LLM.SiliconFlowLLM) {
+                        const llm = cfg.LLM.SiliconFlowLLM;
+                        if (llm.model_name) document.getElementById('llmModelSelect').value = llm.model_name;
+                        if (llm.temperature !== undefined) {
+                            document.getElementById('tempSlider').value = llm.temperature;
+                            document.getElementById('tempDisplay').textContent = llm.temperature;
+                        }
+                        if (llm.max_tokens) document.getElementById('maxTokensInput').value = llm.max_tokens;
+                        if (llm.api_key) document.getElementById('sfApiKeyInput').value = llm.api_key;
+                    }
+                    if (cfg.TTS && cfg.TTS.CosyVoiceSiliconflow && cfg.TTS.CosyVoiceSiliconflow.voice) {
+                        document.getElementById('ttsVoiceSelect').value = cfg.TTS.CosyVoiceSiliconflow.voice;
+                    }
+                }
+            } catch (e) {
+                console.error("Errore caricamento config AI:", e);
+            }
+        }
+
+        async function saveAIConfig() {
+            const payload = {
+                model_name: document.getElementById('llmModelSelect').value,
+                temperature: parseFloat(document.getElementById('tempSlider').value),
+                max_tokens: parseInt(document.getElementById('maxTokensInput').value),
+                api_key: document.getElementById('sfApiKeyInput').value,
+                voice: document.getElementById('ttsVoiceSelect').value
+            };
+            try {
+                const res = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    showToast("Configurazione SiliconFlow & Voce aggiornata!");
+                } else {
+                    showToast("Errore nel salvataggio AI", true);
+                }
+            } catch (e) {
+                showToast("Errore: " + e.message, true);
+            }
+        }
+
+        // Load / Save MCP
+        async function loadMCPConfig() {
+            try {
+                const res = await fetch('/api/mcp');
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('mcpConfigText').value = JSON.stringify(data, null, 2);
+                }
+            } catch (e) {
+                console.error("Errore caricamento MCP:", e);
+            }
+        }
+
+        async function saveMCPConfig() {
+            try {
+                const text = document.getElementById('mcpConfigText').value;
+                const parsed = JSON.parse(text);
+                const res = await fetch('/api/mcp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(parsed)
+                });
+                if (res.ok) {
+                    showToast("Server MCP salvati con successo!");
+                } else {
+                    showToast("Errore nel salvataggio MCP", true);
+                }
+            } catch (e) {
+                showToast("JSON MCP non valido: " + e.message, true);
+            }
+        }
+
+        // Live Chat History & Web Test
+        async function refreshChatHistory() {
+            try {
+                const res = await fetch('/api/status');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.history && data.history.length > 0) {
+                        const feed = document.getElementById('chatFeed');
+                        feed.innerHTML = '';
+                        data.history.forEach(msg => {
+                            const div = document.createElement('div');
+                            div.className = `chat-msg ${msg.role}`;
+                            div.innerHTML = `
+                                <div class="msg-bubble">${msg.content}</div>
+                                <div class="msg-meta">${msg.role === 'user' ? '👤 Utente (Microfono)' : '🤖 Assistente (Speaker)'} &bull; ${msg.time || ''}</div>
+                            `;
+                            feed.appendChild(div);
+                        });
+                        feed.scrollTop = feed.scrollHeight;
+                    }
+                }
+            } catch (e) {
+                console.error("Errore refresh chat:", e);
+            }
+        }
+
+        async function sendWebChat() {
+            const input = document.getElementById('chatInput');
+            const query = input.value.trim();
+            if (!query) return;
+
+            input.value = '';
+            const feed = document.getElementById('chatFeed');
+
+            // Append user msg immediately
+            const userDiv = document.createElement('div');
+            userDiv.className = 'chat-msg user';
+            userDiv.innerHTML = `<div class="msg-bubble">${query}</div><div class="msg-meta">👤 Browser &bull; Inviato</div>`;
+            feed.appendChild(userDiv);
+            feed.scrollTop = feed.scrollHeight;
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: query })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const aiDiv = document.createElement('div');
+                    aiDiv.className = 'chat-msg assistant';
+                    aiDiv.innerHTML = `<div class="msg-bubble">${data.reply}</div><div class="msg-meta">🤖 Qwen 2.5 &bull; Ora</div>`;
+                    feed.appendChild(aiDiv);
+                    feed.scrollTop = feed.scrollHeight;
+                }
+            } catch (e) {
+                showToast("Errore chat: " + e.message, true);
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPrompt();
+            loadAIConfig();
+            loadMCPConfig();
+            setInterval(refreshChatHistory, 3000);
+        });
+    </script>
+</body>
+</html>

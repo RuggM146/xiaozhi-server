@@ -2,6 +2,7 @@
   ip: 0.0.0.0
   port: 8000
   http_port: 8003
+  websocket: wss://xiaozhi-server-icnq.onrender.com/xiaozhi/v1/
 
 selected_module:
   VAD: SileroVAD

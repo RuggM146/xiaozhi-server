@@ -238,13 +238,13 @@ class UnifiedServer:
 
             full_reply = ""
             if self._llm:
-                response = self._llm.response(dialogue)
-                if asyncio.iscoroutine(response):
-                    full_reply = await response
-                elif hasattr(response, "__iter__"):
+                response = self._llm.response("web-session", dialogue)
+                if hasattr(response, "__iter__") and not asyncio.iscoroutine(response):
                     for chunk in response:
                         if chunk:
                             full_reply += str(chunk)
+                elif asyncio.iscoroutine(response):
+                    full_reply = await response
                 else:
                     full_reply = str(response)
             else:

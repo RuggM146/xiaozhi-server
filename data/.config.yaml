@@ -5,12 +5,20 @@
 
 selected_module:
   VAD: SileroVAD
-  ASR: FunASR
+  ASR: OpenaiASR
   LLM: SiliconFlowLLM
   VLLM: ChatGLMVLLM
   TTS: CosyVoiceSiliconflow
   Memory: nomem
   Intent: function_call
+
+ASR:
+  OpenaiASR:
+    type: openai
+    api_key: sk-rwndxsrgjcqwmdsxufvbxqxgthddgnzwjhdiygqhnuerubsk
+    base_url: https://api.siliconflow.cn/v1/audio/transcriptions
+    model_name: FunAudioLLM/SenseVoiceSmall
+    output_dir: tmp/
 
 LLM:
   SiliconFlowLLM:

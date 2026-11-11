@@ -1,3 +1,4 @@
+import os
 import sys
 import uuid
 import signal
@@ -61,6 +62,21 @@ async def main():
             auth_key = str(uuid.uuid4().hex)
     
     config["server"]["auth_key"] = auth_key
+
+    # Dynamic PORT environment variable support (Render, Railway, etc.)
+    env_port = os.environ.get("PORT")
+    if env_port:
+        config["server"]["port"] = int(env_port)
+
+    # Dynamic SILICONFLOW_API_KEY environment variable support
+    sf_key = os.environ.get("SILICONFLOW_API_KEY")
+    if sf_key:
+        if "SiliconFlowLLM" in config.get("LLM", {}):
+            config["LLM"]["SiliconFlowLLM"]["api_key"] = sf_key
+        if "CosyVoiceSiliconflow" in config.get("TTS", {}):
+            config["TTS"]["CosyVoiceSiliconflow"]["access_token"] = sf_key
+        if "OpenaiASR" in config.get("ASR", {}):
+            config["ASR"]["OpenaiASR"]["api_key"] = sf_key
 
     # 添加 stdin 监控任务
     stdin_task = asyncio.create_task(monitor_stdin())

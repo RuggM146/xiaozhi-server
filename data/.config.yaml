@@ -1,0 +1,31 @@
+﻿server:
+  ip: 0.0.0.0
+  port: 8000
+  http_port: 8003
+
+selected_module:
+  VAD: SileroVAD
+  ASR: FunASR
+  LLM: SiliconFlowLLM
+  VLLM: ChatGLMVLLM
+  TTS: CosyVoiceSiliconflow
+  Memory: nomem
+  Intent: function_call
+
+LLM:
+  SiliconFlowLLM:
+    type: openai
+    base_url: https://api.siliconflow.cn/v1
+    model_name: Qwen/Qwen2.5-7B-Instruct
+    api_key: sk-rwndxsrgjcqwmdsxufvbxqxgthddgnzwjhdiygqhnuerubsk
+    temperature: 0.7
+    max_tokens: 500
+
+TTS:
+  CosyVoiceSiliconflow:
+    type: siliconflow
+    model: FunAudioLLM/CosyVoice2-0.5B
+    voice: FunAudioLLM/CosyVoice2-0.5B:alex
+    output_dir: tmp/
+    access_token: sk-rwndxsrgjcqwmdsxufvbxqxgthddgnzwjhdiygqhnuerubsk
+    response_format: wav
